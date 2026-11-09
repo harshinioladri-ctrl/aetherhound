@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aetherhound"
+version = "1.0.0"
+authors = [
+  { name="Infotact Solutions Internship SIGINT Team" },
+]
+description = "AetherHound: Air-Gapped RF & Acoustic Covert Channel Detector"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Security",
+]
+dependencies = [
+    "numpy>=1.24",
+    "torch>=2.0",
+]
+
+[project.optional-dependencies]
+audio = ["sounddevice>=0.4", "pyaudio>=0.2.14"]
+sdr = ["pyrtlsdr>=0.3"]
+rpi = ["gpiozero>=2.0"]
+
+[project.scripts]
+aetherhound = "aetherhound.cli:main"
+
+[tool.setuptools]
+packages = ["aetherhound"]

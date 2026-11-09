@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+logs/
+aetherhound/logs/
+models/
+aetherhound/models/
+data/
+
+.pytest_cache/
+.coverage
+htmlcov/

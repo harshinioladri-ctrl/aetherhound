@@ -1,0 +1,190 @@
+options:
+  parameters:
+    author: 'AetherHound Defensive SIGINT Team'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: 'Infotact Solutions'
+    description: 'Air-Gapped Covert Channel RF and Acoustic DSP Filter & Spectrogram Pipeline'
+    gen_cmake: 'On'
+    gen_linking: 'dynamic'
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: aetherhound_sdr
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} : {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: AetherHound SDR & Acoustic DSP Flowgraph
+    window_size: (1280, 720)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: 'Sample rate: 48 kHz (audio) or 2.4 MHz (RTL-SDR)'
+    value: '48000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [184, 12]
+    rotation: 0
+    state: enabled
+
+- name: fft_size
+  id: variable
+  parameters:
+    comment: 'FFT window length'
+    value: '1024'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [280, 12]
+    rotation: 0
+    state: enabled
+
+- name: audio_source_0
+  id: audio_source
+  parameters:
+    alias: ''
+    comment: 'Ultrasonic Microphone or Line In'
+    device_name: ''
+    num_outputs: '1'
+    ok_to_block: 'True'
+    samp_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [48, 180]
+    rotation: 0
+    state: enabled
+
+- name: band_pass_filter_0
+  id: band_pass_filter
+  parameters:
+    beta: '6.76'
+    comment: 'Filter out standard 50/60Hz AC mains and 120Hz rectifier hum'
+    decim: '1'
+    gain: '1'
+    high_cutoff_freq: samp_rate / 2 - 500
+    interp: '1'
+    low_cutoff_freq: '300'
+    samp_rate: samp_rate
+    type: fir_filter_fff
+    width: '100'
+    win: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [248, 140]
+    rotation: 0
+    state: enabled
+
+- name: blocks_stream_to_vector_0
+  id: blocks_stream_to_vector
+  parameters:
+    alias: ''
+    comment: 'Frame batching'
+    num_items: fft_size
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [456, 184]
+    rotation: 0
+    state: enabled
+
+- name: fft_vxx_0
+  id: fft_vxx
+  parameters:
+    alias: ''
+    comment: 'Windowed Fast Fourier Transform'
+    fft_size: fft_size
+    forward: 'True'
+    shift: 'False'
+    type: float
+    window: window.blackmanharris(fft_size)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [640, 160]
+    rotation: 0
+    state: enabled
+
+- name: blocks_complex_to_mag_squared_0
+  id: blocks_complex_to_mag_squared
+  parameters:
+    alias: ''
+    comment: 'Calculate Power Spectrum'
+    vlen: fft_size
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [864, 184]
+    rotation: 0
+    state: enabled
+
+- name: blocks_nlog10_ff_0
+  id: blocks_nlog10_ff
+  parameters:
+    alias: ''
+    comment: 'Convert to logarithmic dB scale'
+    k: '0'
+    n: '10'
+    vlen: fft_size
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1056, 176]
+    rotation: 0
+    state: enabled
+
+- name: network_udp_sink_0
+  id: network_udp_sink
+  parameters:
+    alias: ''
+    comment: 'Stream live spectrogram vectors to AetherHound ML Engine'
+    destination_ip: 127.0.0.1
+    destination_port: '9090'
+    header: 'None'
+    payloadsize: 1024 * 4
+    send_eof: 'False'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1240, 160]
+    rotation: 0
+    state: enabled
+
+connections:
+- [audio_source_0, '0', band_pass_filter_0, '0']
+- [band_pass_filter_0, '0', blocks_stream_to_vector_0, '0']
+- [blocks_stream_to_vector_0, '0', fft_vxx_0, '0']
+- [fft_vxx_0, '0', blocks_complex_to_mag_squared_0, '0']
+- [blocks_complex_to_mag_squared_0, '0', blocks_nlog10_ff_0, '0']
+- [blocks_nlog10_ff_0, '0', network_udp_sink_0, '0']

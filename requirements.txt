@@ -1,0 +1,9 @@
+numpy>=1.24
+torch            # autoencoder model (falls back to statistical model if missing)
+sounddevice      # live microphone capture
+pyrtlsdr         # RTL-SDR dongles
+gpiozero         # buzzer on Raspberry Pi
+
+# Optional hardware integrations:
+# SoapySDR is only needed for HackRF/SDR capture on Linux and is intentionally omitted here
+# because it is not consistently available on all platforms.

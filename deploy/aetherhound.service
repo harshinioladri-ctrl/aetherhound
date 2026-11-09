@@ -1,0 +1,11 @@
+[Unit]
+Description=AetherHound covert-channel detector (headless)
+After=sound.target
+
+[Service]
+WorkingDirectory=/opt/aetherhound
+ExecStart=/usr/bin/python3 -m aetherhound run --source audio --no-ui
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+{
+  "fs": 48000,
+  "frame": 1024,
+  "nbins": 64,
+  "train_seconds": 45,
+  "model": "auto",
+  "topk": 3,
+  "thr_margin": 1.3,
+  "persist": 4,
+  "release_sec": 1.0,
+  "ema_alpha": 0.0005,
+  "ignore_bands": [],
+  "center_hz": 433000000,
+  "buzzer_gpio": null
+}
